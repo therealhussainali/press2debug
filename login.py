@@ -24,24 +24,29 @@ def Signin(enteredusername, enteredpassword):
 # todo's will save the todo's 
 # todo's inside file, will be displayed.
 
-def Todo(username):
+def Todo(username, enteredtodo, mode):
     filename = f"{username}list.txt"
     todos = []
 
     # Check if file exists — if yes, read existing todos
-    if os.path.exists(filename):
+    if os.path.exists(filename) and mode == "fetch":
         with open(filename, "r") as file:
             # "take the chicken out of the freezer."
             todos = [line.strip() for line in file.readlines()]
-        print(f"📋 Welcome back, {username}! Here are your current to-dos:")
-        for i, t in enumerate(todos, start=1):
-            print(f"{i}. {t}")
+            return todos
+    elif mode == "add":
+        with open(filename, "w") as file:
+            file.write(enteredtodo)
+        return "confirmation msg"
+        # add a todolist here
     else:
-        print(f"📝 No existing to-do list found for {username}. Creating a new one...")
+        return []
+        # for i, t in enumerate(todos, start=1):
+            # print(f"{i}. {t}")        
 
     # Main input loop
     while True:
-        todo = input("\nEnter a new to-do (or type 'exit' to stop): ").strip()
+        todo = enteredtodo
         if todo.lower() == "exit":
             break
         todos.append(todo)
@@ -52,14 +57,10 @@ def Todo(username):
         # 4. bring groceries
 
         # Display current todos
-        print("\nYour current to-dos:")
         for i, t in enumerate(todos, start=1):
             print(f"{i}. {t}")
 
         # Save to file after each addition
-        with open(filename, "w") as file:
-            for t in todos:
-                file.write(t + "\n")
                 # take chicken out of freezer.
                 # go to tuition.
                 # study for maths test
