@@ -1,77 +1,72 @@
 import os
 import lesson2
+import requests
+
+
+# BACKEND
 
 def Signin(enteredusername, enteredpassword):
-    username = enteredusername # input("Enter a username: ")
-    passw = enteredpassword # input("Enter a password: ")
+    url = "http://127.0.0.1:5000/api/users/login"
+    username = enteredusername
+    passw = enteredpassword
 
-    # formatted string
-    # hussainali
-    filename = f"{username}.txt"
-    
-    if os.path.exists(filename):
-        with open(filename, "r") as file:
-            savedpass = file.read()
-            print(lesson2.hash_password(passw))
-            if lesson2.hash_password(passw) == savedpass:
-                return "successful login!"
-            else:
-                return "unsuccessful login, enter password again"
+    payload = {
+        "username": username,
+        "password": passw
+    }
+
+    response = requests.post(url, json=payload)
+
+    if response.status_code == 200:
+        return "Successful Login"
+    else:
+        return "Invalid Login Details"
 
 
-# Create a To-do List program
-# todo's writing from the user
-# todo's will save the todo's 
-# todo's inside file, will be displayed.
+def Signup(enteredusername, enteredpassword):
+    url = "http://127.0.0.1:5000/api/users/signup"
+    username = enteredusername
+    passw = enteredpassword
 
-def Todo(username, enteredtodo, mode):
-    filename = f"{username}list.txt"
+    payload = {
+        "username": username,
+        "password": passw
+    }
+
+    response = requests.post(url, json=payload)
+
+    if response.status_code == 201:
+        return "Successful Signup"
+
+
+def fetch_todos(user_id):
+    url = f"http://127.0.0.1:5000/api/users/{user_id}/todos"
+    response = requests.get(url)
     todos = []
 
-    # Check if file exists — if yes, read existing todos
-    if os.path.exists(filename) and mode == "fetch":
-        with open(filename, "r") as file:
-            # "take the chicken out of the freezer."
-            todos = [line.strip() for line in file.readlines()]
-            return todos
-    elif mode == "add":
-        with open(filename, "w") as file:
-            file.write(enteredtodo)
-        return "confirmation msg"
-        # add a todolist here
+    if response.status_code == 200:
+        data = response.json()
+        for todo in data["todos"]:
+            todos.append(todo)
+        return todos
     else:
+        print("Error:", response.status_code, response.text)
         return []
-        # for i, t in enumerate(todos, start=1):
-            # print(f"{i}. {t}")        
 
-    # Main input loop
-    while True:
-        todo = enteredtodo
-        if todo.lower() == "exit":
-            break
-        todos.append(todo)
 
-        # 1. take chicken out of freezer
-        # 2. go to tuition 
-        # 3. study for maths test 
-        # 4. bring groceries
+def add_todo(username, todo_text):
+    url = "http://127.0.0.1:5000/api/users/todo"
+    payload = {
+        "username": username,
+        "todo": todo_text
+    }
 
-        # Display current todos
-        for i, t in enumerate(todos, start=1):
-            print(f"{i}. {t}")
+    response = requests.post(url, json=payload)
 
-        # Save to file after each addition
-                # take chicken out of freezer.
-                # go to tuition.
-                # study for maths test
+    if response.status_code == 200:
+        return "Todo added successfully"
+    else:
+        print("Error:", response.status_code, response.text)
+        return "Failed to add todo"
 
-        choice = input("\nDo you want to add another? (y/n): ").strip().lower()
-        if choice != 'y':
-            break
-
-    # Final list display
-    print("\nFinal To-Do List Saved:")
-    for i, t in enumerate(todos, start=1):
-        print(f"{i}. {t}")
-
-    print(f"\nAll tasks saved to {filename} ")
+    

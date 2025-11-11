@@ -2,7 +2,9 @@ import tkinter as tk
 from tkinter import messagebox
 from login import Signin
 from signup import Register
-from login import Todo
+from login import fetch_todos
+from login import add_todo
+from login import Signup
 
 def open_todo_window(username):
     todo_window = tk.Toplevel()
@@ -27,7 +29,7 @@ def open_todo_window(username):
 
     # Placeholder local storage (in-memory for now)
     todos = []
-    todos = Todo(username, entry.get().strip(), "fetch")
+    todos = fetch_todos(username)
 
     for i, t in enumerate(todos, start=1):
         listbox.insert(tk.END, t)
@@ -37,6 +39,7 @@ def open_todo_window(username):
     def add_task():
         task = entry.get().strip()
         if task: #check if its null or not.
+            add_todo(username, task)
             todos.append(task)
             listbox.insert(tk.END, task)
             entry.delete(0, tk.END)
@@ -61,6 +64,10 @@ def open_todo_window(username):
     tk.Button(todo_window, text="Logout", width=12, command=todo_window.destroy).pack(pady=10)
 
 
+
+# GUI -> BACKEND -> CALLS API -> API ADDS/GETS INFORMATION FROM DATABASE
+# 3 processes are running
+
 # --- Login / Signup Window ---
 def login_ui():
     root = tk.Tk()
@@ -80,22 +87,25 @@ def login_ui():
 
     # Placeholder login/signup functions
     def handle_login():
-        username = username_entry.get().strip()
+        username = username_entry.get()
         password = password_entry.get()
         result = Signin(username, password)
 
         messagebox.showinfo("Login", result)
-        root.withdraw()  # hide login window
-        open_todo_window(username)
+
+        if result == "Successful Login":
+            root.withdraw()  # hide login window
+            open_todo_window(username)
 
     def handle_signup():
         username = username_entry.get().strip()
         password = password_entry.get()
-        result = Register(username, password)
+        result = Signup(username, password)
 
         messagebox.showinfo("Sign Up", result)
-        root.withdraw()
-        open_todo_window(username)
+        if result == "Successful Signup":
+            root.withdraw()
+            open_todo_window(username)
 
     # Buttons
     btn_frame = tk.Frame(root)
